@@ -1,8 +1,8 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import "./index.css";
   export let name;
-
+  let flag = false;
   let todos = [
     // { done: false, text: "finish to-do app" },
     // { done: false, text: "prepare for driving test" },
@@ -12,9 +12,16 @@
   // Load todos from localStorage on component mount
   onMount(() => {
     const storedTodos = localStorage.getItem("todos");
+    console.log("this is from onMount, storedTodos", storedTodos);
     if (storedTodos) {
       todos = JSON.parse(storedTodos);
     }
+    flag = true;
+  });
+
+  onDestroy(() => {
+    const storedTodos = localStorage.getItem("todos");
+    console.log("this is onDestroy", onDestroy);
   });
 
   function add() {
@@ -35,7 +42,10 @@
 
   // Save todos to localStorage whenever todos or searchText changes
   $: {
-    saveTodos();
+    if (flag === true) {
+      console.log("this is another one", todos);
+      saveTodos();
+    }
   }
 </script>
 
@@ -47,6 +57,16 @@
 </header>
 
 <main class="main">
+  <div id="search-input-cont">
+    <input
+      type="text"
+      id="search-field"
+      placeholder="Filter todos"
+      autocapitalize="off"
+      on:input
+    />
+  </div>
+
   {#each todos as todo}
     <div class:done={todo.done}>
       <input type="checkbox" bind:checked={todo.done} />
@@ -54,16 +74,7 @@
       <input placeholder="What needs to be done?" bind:value={todo.text} />
     </div>
   {/each}
-  <div id="search-input-cont">
-    <input
-      type="text"
-      id="search-field"
-      placeholder="Filter todos"
-      autocapitalize="off"
-      bind:value={todos}
-      on:input
-    />
-  </div>
+
   <p>{remaining} remaining</p>
 
   <button on:click={add}> Add new </button>
@@ -88,17 +99,23 @@
   }
 
   #search-field {
-    width: 100%;
-    font-size: 1.1rem;
-    border: 3px solid rgba(48, 17, 187, 0.635);
+    width: 200px;
+    font-size: 1rem;
+    border: 2px solid rgba(48, 17, 187, 0.635);
     border-radius: 5px;
     padding: 5px;
-    margin: 0 0px 0;
+    margin: 15px;
+    box-shadow: 5px 5px blueviolet;
   }
 
   .main {
-    background-color: darkgrey;
+    margin: 0px;
+    border: 1px solid white;
+    padding: 50px;
+    background-color: #f2f3f4;
     opacity: 10;
+    min-height: 100%;
+
     /* display: block; */
   }
 
@@ -131,12 +148,12 @@
     text-transform: lowercase;
     text-align: left;
     font-family: "Comic Sans MS", cursive;
-    font-size: 1.5em;
+    font-size: 1.1em;
     font-weight: 300;
   }
 
   button {
-    color: "red";
+    /* color: black; */
     text-align: center;
     font-family: "Comic Sans MS", cursive;
   }
